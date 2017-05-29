@@ -16,6 +16,8 @@ SRC = hello.c
 DLIB_SRC = libhello.c 
 SLIB_SRC = libgoodbye.c
 
+DL_PATH = /opt/lib
+
 #%.o : %.c
 #	$(CC) -Wall -c $< -o $@
 
@@ -31,11 +33,22 @@ $(SLIB) : $(S_OBJ)
 
 
 $(DLIB) : $(D_OBJ)
-	$(CC) -shared -o $@ $<
+	$(CC) -shared -Wl,-soname,$@.1 -o $@.1.0  $< 
+#	$(CC) -shared -o $@ $<
+
+dlin : $(DLIB)
+	@echo "Dyn lib linkage"
+	mv $<.1.0 $(DL_PATH)
+	ln -sf $(DL_PATH)/$<.1.0 $(DL_PATH)/$<.1
+	ln -sf $(DL_PATH)/$<.1.0 $(DL_PATH)/$<
+	export LD_LIBRARY_PATH=$(DL_PATH):$LD_LIBRARY_PATH
+#	export LD_LIBRARY_PATH=/opt/lib:$LD_LIBRARY_PATH
 
 
 $(TARGET) :
-	$(CC) -o $(TARGET) $(SRC) $(LIBS)
+	$(CC) -Wall -L$(DL_PATH) $(SRC) $(SLIB) -lhello -o $@
+#	$(CC) -Wall -L$(DL_PATH) $(SRC) $(LIBS) -o $@
+#	$(CC) -o $(TARGET) $(SRC) $(LIBS)
 
 OBJ = $(S_OBJ) $(D_OBJ)
 
@@ -43,24 +56,14 @@ LIBS = $(SLIB) $(DLIB)
 
 OUTPUT = $(OBJ) $(LIBS) $(TARGET)
 
-libs : $(OBJ) $(LIBS)
+libs : $(OBJ) $(LIBS) dlin
 
 build : libs $(TARGET)
 
 clean :
 	@echo "Clear..."
-	rm --version
-	$(RM) $(OUTPUT)
-#	$(RM) $(OBJ) $(LIBS)
+	$(RM) $(OUTPUT) 
+	$(RM) $(DLIB).1.0
 
-#$(RM) $(OBJ)
-#$(OUTPUT)
 
 all : clean build
-
-
-txt :
-	@echo OBJ   : $(OBJ)
-	@echo OUTPUT: $(OUTPUT)
-
-obj: $(OBJ)
