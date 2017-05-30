@@ -46,7 +46,7 @@ dlin : $(DLIB)
 
 
 $(TARGET) :
-	$(CC) -rdynamic $(SRC) $(SLIB) -ldl -o $@
+	$(CC) -Wall -rdynamic $(SRC) $(SLIB) -ldl -o $@
 #	$(CC) -Wall -L$(DL_PATH) $(SRC) $(SLIB) -lhello -o $@
 #	$(CC) -Wall -L$(DL_PATH) $(SRC) $(LIBS) -o $@
 #	$(CC) -o $(TARGET) $(SRC) $(LIBS)
